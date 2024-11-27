@@ -76240,7 +76240,15 @@ GU = g2e;
   name: "sv-table"
 })], []).c;
 KU();
-const XU = "chartjs-geo", iP = '<canvas ref="geochart" class="chartjsgeo"></canvas>', QU = [], ZU = {};
+const XU = "chartjs-geo", iP = `<div class="chartjsgeocontainer">
+<canvas ref="geochart" class="chartjsgeo"></canvas>
+<div class="chartjsgeodesc">
+    <b>\${selected.Country}</b><br/>
+    <span>\${selected['Project Name']}</span><br/>
+    <i>\${selected.Publication}</i><br/>
+    <a href.bind='selected.Website' target="_blank" class="truncate">\${selected.Website}</a> <br/>
+</div>
+</div>`, QU = [], ZU = {};
 let VT;
 function p2e(n) {
   VT || (VT = Vs.define({ name: XU, template: iP, dependencies: QU, bindables: ZU })), n.register(VT);
@@ -80429,7 +80437,7 @@ function fVe(n) {
 let nG;
 class gVe {
   constructor() {
-    this.datasrc = ZY(this, "g/National_Initiatives_Figure_Data.csv"), this.countriessrc = (JY(this), eG(this, "https://unpkg.com/world-atlas/countries-50m.json")), this.geochart = void tG(this);
+    this.datasrc = ZY(this, "g/National_Initiatives_Figure_Data.csv"), this.countriessrc = (JY(this), eG(this, "https://unpkg.com/world-atlas/countries-50m.json")), this.geochart = void tG(this), this.countryDataDesc = {};
   }
   // Helper function to parse CSV
   parseCSV(e) {
@@ -80437,38 +80445,40 @@ class gVe {
 `).map((s) => s.split(",")), i = t.shift();
     return t.map((s) => i.reduce((r, o, a) => (r[o] = s[a], r), {}));
   }
+  showSelected(e) {
+    console.log("showselected", e), this.selected = this.countryDataDesc[e], console.log(this.selected);
+  }
   attached() {
     ur.register(vp, ec, qd, wu, ...$5), Promise.all([
       fetch(this.countriessrc).then((e) => e.json()),
       fetch(this.datasrc).then((e) => e.text())
       // Fetch the CSV file
     ]).then(([e, t]) => {
-      const i = nVe(e, e.objects.countries).features, s = this.parseCSV(t);
-      let r = {};
-      for (let a of s)
-        r[a["ISO 3166-1 alpha-2 Code"]] = a["project status (number)"];
-      let o = [];
-      for (let a of i) {
-        let l = qY.whereNumeric(a.id), c = 0;
-        if (l) {
-          let u = l.alpha2, h = r[u];
-          c = parseFloat(h);
-        } else
-          console.warn("cannot find alpha code for country with id" + a.id + " name:" + a.properties.name);
-        o.push({
-          feature: a,
+      let i = this;
+      const s = nVe(e, e.objects.countries).features, r = this.parseCSV(t);
+      let o = {};
+      this.countryDataDesc = {};
+      for (let l of r) {
+        let c = qY.whereAlpha2(l["ISO 3166-1 alpha-2 Code"]);
+        c && (o[c.numeric] = l["project status (number)"], this.countryDataDesc[c.numeric] = l);
+      }
+      let a = [];
+      for (let l of s) {
+        let c = 0, u = o[l.id];
+        u ? c = parseFloat(u) : console.warn("no data for country with id" + l.id + " name:" + l.properties.name), a.push({
+          feature: l,
           value: c
         });
       }
       new ur(this.geochart.getContext("2d"), {
         type: "choropleth",
         data: {
-          labels: i.map((a) => a.properties.name),
+          labels: s.map((l) => l.id + ":" + l.properties.name),
           datasets: [{
             label: "Countries",
             //data: countries.map((d) => ({ feature: d, value: Math.random() })),
-            data: o,
-            outline: i
+            data: a,
+            outline: s
           }]
         },
         options: {
@@ -80492,6 +80502,10 @@ class gVe {
                 align: "right"
               }
             }
+          },
+          onClick: (l, c) => {
+            let u = c.map((h) => h.element.feature.id);
+            console.log("selected item + this + that", u, this, i), i.showSelected(u[0]);
           }
         }
       });
