@@ -1,2 +1,9 @@
+<div class="chartjsgeocontainer">
 <canvas ref="geochart" class="chartjsgeo"></canvas>
-<div class="chartjsdesc"></div>
+<div class="chartjsgeodesc">
+    <b>${selected.Country}</b><br/>
+    <span>${selected['Project Name']}</span><br/>
+    <i>${selected.Publication}</i><br/>
+    <a href.bind='selected.Website' target="_blank" class="truncate">${selected.Website}</a> <br/>
+</div>
+</div>
