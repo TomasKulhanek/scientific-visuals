@@ -11,7 +11,10 @@
     "@aurelia/router": "latest",
     "@aurelia/web-components": "^2.0.0-beta.22",
     "aurelia": "latest",
-    "chart.js": "^4.4.6"
+    "chart.js": "^4.4.6",
+    "chartjs-chart-geo": "^4.3.4",
+    "handsontable": "^14.6.1",
+    "iso-3166-1": "^2.1.1"
   },
   "devDependencies": {
     "@aurelia/testing": "latest",
